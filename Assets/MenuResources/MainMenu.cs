@@ -17,7 +17,6 @@ public class MainMenu : MonoBehaviour
 
     public void PlayGame()
     {
-        // TODO: If your game does not have GameScene as the scene directly after the menu scene, change the next line
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 }
