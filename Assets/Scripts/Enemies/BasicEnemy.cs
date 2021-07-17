@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 
 public enum EnemyState
 {
     IDLE,
     MOVING,
+    PATROLING,
     ATTACKING,
 }
 
@@ -33,12 +35,23 @@ public class BasicEnemy : Enemy
     [Tooltip("Weapon Sprite")]
     public Transform weaponTransform;
 
+
+    [Header("Enemy Movement")]
     [Tooltip("How fast can the enemy move?")]
     public float moveSpeed;
 
-    GameObject target;
+    [Header("Enemy State handling")]
+    float idleDone;
+    public bool patrolSwitch;
+    public Transform patrolLoc;
+
+    float reachDist = 0.2f;
+
+    [Tooltip("Player target")]
+    public GameObject target;
     Vector3 lastPlayerSighing;
     Vector3 moveDest;
+    Vector3 startPos;
 
     // For determining which way the enemy is currently facing.
     private bool m_FacingRight = true;
@@ -49,19 +62,62 @@ public class BasicEnemy : Enemy
     public EnemyState currentState;
 
 
+    // Section: State handling
+    void _handlePatrolOrMoveState()
+    {
+        if (Mathf.Abs(transform.position.x - moveDest.x)  < reachDist)
+        {
+            //Transition to idle
+            idleDone = Time.time + Random.Range(1.5f, 3.0f);
+            currentState = EnemyState.IDLE;
+            // TODO: Animation handling
+            //anim.SetFloat("move", 0);
+            //anim.SetTrigger("idle");
+        }
+    }
+
+    void _handleIdleState()
+    {
+        if (Time.time > idleDone)
+        {
+            //Transition back to patrolling
+            if (patrolSwitch)
+            {
+                moveDest = patrolLoc.position;
+            }
+            else
+            {
+                moveDest = startPos;
+            }
+            patrolSwitch = !patrolSwitch;
+            currentState = EnemyState.PATROLING;
+        }
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {
         currentHealth = maxHealth;
         currentState = EnemyState.IDLE;
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
+        startPos = transform.position;
+
+        if (target != null)
+        {
+            Debug.Log("Started with target!!!");
+            currentState = EnemyState.ATTACKING;
+        }
+        else if (patrolLoc != null)
+        {
+            moveDest = patrolLoc.position;
+            currentState = EnemyState.PATROLING;
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    void _handleAttackState()
     {
-
-        if(target != null)
+        if (target != null)
         {
             UpdateLookAt();
 
@@ -74,10 +130,28 @@ public class BasicEnemy : Enemy
                 FireAtTarget();
             }
         }
+    }
 
-        if(currentState == EnemyState.MOVING)
+    // Update is called once per frame
+    void Update()
+    {
+
+        switch (currentState)
         {
-            MoveTowardsDest();
+            case EnemyState.PATROLING:
+                Move();
+                _handlePatrolOrMoveState();
+                break;
+            case EnemyState.MOVING:
+                Move();
+                _handlePatrolOrMoveState();
+                break;
+            case EnemyState.ATTACKING:
+                _handleAttackState();
+                break;
+            case EnemyState.IDLE:
+                _handleIdleState();
+                break;
         }
 
     }
@@ -100,19 +174,19 @@ public class BasicEnemy : Enemy
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        currentState = EnemyState.ATTACKING;
         if (collision.gameObject.CompareTag("Player"))
         {
+            currentState = EnemyState.ATTACKING;
             target = collision.gameObject;
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        currentState = EnemyState.MOVING;
         if (collision.gameObject.CompareTag("Player"))
         {
             target = null;
+            currentState = EnemyState.MOVING;
             lastPlayerSighing = collision.gameObject.transform.position;
             moveDest = lastPlayerSighing;
         }
@@ -143,15 +217,24 @@ public class BasicEnemy : Enemy
         weaponTransform.rotation = Quaternion.Euler(0f, 0f, rot_Z + 180);
     }
 
-
-    void MoveTowardsDest()
+    void Move()
     {
+        // Move the character by finding the target velocity
         float dX = moveDest.x - transform.position.x > 0 ? moveSpeed : -1 * moveSpeed;
         Vector3 targetVelocity = new Vector2(dX, m_Rigidbody2D.velocity.y);
-        m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref velocity, .05f);
+        //anim.SetFloat("move", Mathf.Abs(dX));
+        // And then smoothing it out and applying it to the character
+        m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref velocity, 0.05f);
 
-        if (dX < 0 && m_FacingRight)
+        if (dX > 0 && m_FacingRight)
         {
+            // ... flip the player.
+            Flip();
+        }
+        // Otherwise if the input is moving the player left and the player is facing right...
+        else if (dX < 0 && !m_FacingRight)
+        {
+            // ... flip the player.
             Flip();
         }
     }
@@ -165,5 +248,12 @@ public class BasicEnemy : Enemy
         Vector3 theScale = transform.localScale;
         theScale.x *= -1;
         transform.localScale = theScale;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawSphere(moveDest, 0.2f);
+        Handles.Label(transform.position + new Vector3(0, 1.0f, 0), currentState.ToString());
+        
     }
 }
