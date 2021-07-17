@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
 {
-
+    public bool isPlayer;
     public int maxHealth;
     public int currentHealth;
 
@@ -21,6 +21,7 @@ public class PlayerHealth : MonoBehaviour
         {
             //TODO: Handle OnGameOver
         }
-        CameraEffects.Instance.CameraShake.Shake(0.425f, 0.2f);
+        if(isPlayer)
+            CameraEffects.Instance.CameraShake.Shake(0.425f, 0.2f);
     }
 }

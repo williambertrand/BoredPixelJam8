@@ -7,6 +7,7 @@ public class Projectile : MonoBehaviour
 
     public int damage;
     public bool shouldPoint = true;
+    public bool isPlayerShot;
 
     public bool hasDrop;
     public string dropName; // Should match the ObjectPool name for whichever object we want to drop on collision
@@ -36,9 +37,14 @@ public class Projectile : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player") && !isPlayerShot)
         {
             collision.gameObject.GetComponent<PlayerHealth>().TakeDamage(damage);
+            Destroy(gameObject);
+        }
+        else if (collision.gameObject.CompareTag("Enemy") && isPlayerShot)
+        {
+            collision.gameObject.GetComponent<Enemy>().TakeDamage(damage);
             Destroy(gameObject);
         }
         else if (collision.gameObject.layer == 8) //TODO: Layer constants...
