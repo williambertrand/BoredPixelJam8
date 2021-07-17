@@ -10,7 +10,7 @@ public enum EnemyState
     ATTACKING,
 }
 
-public class BasicEnemy : MonoBehaviour
+public class BasicEnemy : Enemy
 {
 
 
@@ -32,10 +32,6 @@ public class BasicEnemy : MonoBehaviour
 
     [Tooltip("Weapon Sprite")]
     public Transform weaponTransform;
-
-    [Tooltip("Enemy Health")]
-    public int maxHealth;
-    public int currentHealth;
 
     [Tooltip("How fast can the enemy move?")]
     public float moveSpeed;
