@@ -7,8 +7,13 @@ public class Parallax : MonoBehaviour
 {
     public float length;
     public float startPos;
-    public GameObject cam;
+    private Transform cameraTransform;
+    private Vector3 lastCameraPosition;
     public float parallaxFactor;
+
+    private float textureUnitSizeX;
+
+    public int index;
 
 
     // Start is called before the first frame update
@@ -16,17 +21,30 @@ public class Parallax : MonoBehaviour
     {
         startPos = transform.position.x;
         length = GetComponent<SpriteRenderer>().bounds.size.x;
+
+        cameraTransform = Camera.main.transform;
+        lastCameraPosition = cameraTransform.position;
+        Sprite sprite = GetComponent<SpriteRenderer>().sprite;
+        Texture2D texture = sprite.texture;
+        textureUnitSizeX = texture.width / sprite.pixelsPerUnit;
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        // How far has it moved relative to camera
-        float moveAmount = cam.transform.position.x * (1 - parallaxFactor);
-        float dist = (cam.transform.position.x * parallaxFactor);
-        transform.position = new Vector3(startPos + dist, transform.position.y, transform.position.z);
+    }
 
-        if (moveAmount > startPos + length) startPos += length;
-        else if (moveAmount < startPos - length) startPos -= length;
+    private void LateUpdate()
+    {
+        Vector3 deltaMovement = cameraTransform.position - lastCameraPosition;
+        transform.position += new Vector3(deltaMovement.x * parallaxFactor, 0.0f, 0.0f);
+        lastCameraPosition = cameraTransform.position;
+
+        if(Mathf.Abs(cameraTransform.position.x - transform.position.x) >= textureUnitSizeX)
+        {
+            float offsetPositionX = (cameraTransform.position.x - transform.position.x) % textureUnitSizeX;
+            transform.position = new Vector3(cameraTransform.position.x + offsetPositionX, transform.position.y, transform.position.z);
+        }
     }
 }
