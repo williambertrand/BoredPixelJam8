@@ -20,6 +20,12 @@ public class PlayerInput : MonoBehaviour
     bool jump = false;
     public bool crouch = false;
 
+    [Header("Player weapon input")]
+    private Vector3 mousePos;
+    public Transform playerGun; //Assign to the object you want to rotate
+    private Vector3 objectPos;
+    private float angle;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -38,6 +44,13 @@ public class PlayerInput : MonoBehaviour
             jump = true;
         }
 
+        if (Input.GetMouseButtonDown(0))
+        {
+            PlayerWeaponController.Instance.AttemptFire();
+        }
+
+        UpdateGunRot();
+
     }
 
     private void FixedUpdate()
@@ -45,5 +58,17 @@ public class PlayerInput : MonoBehaviour
         // Move character
         movement.Move(horizontalMove * Time.fixedDeltaTime, crouch, jump);
         jump = false;
+    }
+
+
+    void UpdateGunRot()
+    {
+        mousePos = Input.mousePosition;
+        //mousePos.z = 5.23; //The distance between the camera and object
+        objectPos = Camera.main.WorldToScreenPoint(playerGun.position);
+        mousePos.x = mousePos.x - objectPos.x;
+        mousePos.y = mousePos.y - objectPos.y;
+        angle = Mathf.Atan2(mousePos.y, mousePos.x) * Mathf.Rad2Deg;
+        playerGun.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
     }
 }

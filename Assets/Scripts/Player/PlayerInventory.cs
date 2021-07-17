@@ -6,6 +6,12 @@ using TMPro;
 public class PlayerInventory : MonoBehaviour
 {
 
+    public static PlayerInventory Instance;
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+    }
+
     public int startingAmmo;
     public int ammoAmount;
     public int maxAmmo;
