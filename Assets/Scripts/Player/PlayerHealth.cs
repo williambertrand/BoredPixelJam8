@@ -21,5 +21,6 @@ public class PlayerHealth : MonoBehaviour
         {
             //TODO: Handle OnGameOver
         }
+        CameraEffects.Instance.CameraShake.Shake(0.425f, 0.2f);
     }
 }
