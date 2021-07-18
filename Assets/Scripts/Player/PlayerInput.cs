@@ -69,6 +69,9 @@ public class PlayerInput : MonoBehaviour
         mousePos.x = mousePos.x - objectPos.x;
         mousePos.y = mousePos.y - objectPos.y;
         angle = Mathf.Atan2(mousePos.y, mousePos.x) * Mathf.Rad2Deg;
+        if (movement.isFacingRight)
+            angle -= 180;
         playerGun.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+        movement.LookAt(mousePos);
     }
 }
