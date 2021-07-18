@@ -19,7 +19,7 @@ public class PlayerMovement : MonoBehaviour
 	private bool m_Grounded;            // Whether or not the player is grounded.
 	const float k_CeilingRadius = .2f; // Radius of the overlap circle to determine if the player can stand up
 	private Rigidbody2D m_Rigidbody2D;
-	private bool m_FacingRight = true;  // For determining which way the player is currently facing.
+	public bool isFacingRight = true;  // For determining which way the player is currently facing.
 	private Vector3 m_Velocity = Vector3.zero;
 
 	[Header("Events")]
@@ -125,18 +125,6 @@ public class PlayerMovement : MonoBehaviour
 			// And then smoothing it out and applying it to the character
 			m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
 
-			// If the input is moving the player right and the player is facing left...
-			if (move < 0 && !m_FacingRight)
-			{
-				// ... flip the player.
-				Flip();
-			}
-			// Otherwise if the input is moving the player left and the player is facing right...
-			else if (move > 0 && m_FacingRight)
-			{
-				// ... flip the player.
-				Flip();
-			}
 		}
 		// If the player should jump...
 		if (m_Grounded && jump)
@@ -147,11 +135,28 @@ public class PlayerMovement : MonoBehaviour
 		}
 	}
 
+	public void LookAt(Vector3 pos)
+    {
+		float dx = transform.position.x - pos.x;
+		// If the input is moving the player right and the player is facing left...
+		if (dx < 0 && isFacingRight)
+		{
+			// ... flip the player.
+			Flip();
+		}
+		// Otherwise if the input is moving the player left and the player is facing right...
+		else if (dx > 0 && !isFacingRight)
+		{
+			// ... flip the player.
+			Flip();
+		}
+	}
+
 
 	private void Flip()
 	{
 		// Switch the way the player is labelled as facing.
-		m_FacingRight = !m_FacingRight;
+		isFacingRight = !isFacingRight;
 
 		// Multiply the player's x local scale by -1.
 		Vector3 theScale = transform.localScale;
