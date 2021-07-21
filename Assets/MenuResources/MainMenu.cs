@@ -3,6 +3,10 @@ using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
+
+    public int GameScene = 1;
+    public int MenuScene = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -17,6 +21,11 @@ public class MainMenu : MonoBehaviour
 
     public void PlayGame()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        SceneManager.LoadScene(GameScene);
+    }
+
+    public void ReturnToMenu()
+    {
+        SceneManager.LoadScene(MenuScene);
     }
 }
