@@ -557,7 +557,7 @@ MonoBehaviour:
     2021.
 
 
-    We are a team of 6: <TODO> add team name and people here!'
+    Team Name: Gorilla Games'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1075,7 +1075,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Instructions on how to play the game go here....
+  m_text: 'Move with WASD or arrow keys.
+
+    Point your mouse and click to shoot.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1908,6 +1910,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f816917f01e8e1843b7aa43e3343525f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GameScene: 1
+  MenuScene: 0
+  isGameOver: 0
+  bountyText: {fileID: 0}
 --- !u!1 &1855584714
 GameObject:
   m_ObjectHideFlags: 0

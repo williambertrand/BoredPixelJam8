@@ -26,7 +26,7 @@ public class PlayerHealth : MonoBehaviour
         if(currentHealth <= 0)
         {
             healthImage.enabled = false;
-            // Ondeath
+            GameManager.Instance.OnGameOver();
         }
         else
         {
