@@ -13,12 +13,27 @@ public class PlayerWeaponController : MonoBehaviour
     public int attackDamage;
     float lastFire;
 
+    [FMODUnity.EventRef]
+    public string FireProjectileEvent;
+
+    [FMODUnity.EventRef]
+    public string NoAmmoEvent;
+
+    FMOD.Studio.EventInstance PE;
+
     private void Awake()
     {
         if(Instance == null)
         {
             Instance = this;
         }
+    }
+
+    private void OnEnable()
+    {
+        PE = FMODUnity.RuntimeManager.CreateInstance(FireProjectileEvent);
+        FMODUnity.RuntimeManager.AttachInstanceToGameObject(PE, transform, GetComponent<Rigidbody2D>());
+        PE.release();
     }
 
     // Start is called before the first frame update
@@ -44,6 +59,8 @@ public class PlayerWeaponController : MonoBehaviour
         GameObject proj = Instantiate(projectile, attackPoint.position, q);
         proj.GetComponent<Rigidbody2D>().AddForce(proj.transform.up * 500.0f);
         proj.GetComponent<Projectile>().damage = attackDamage;
+
+        FMODUnity.RuntimeManager.PlayOneShotAttached(FireProjectileEvent, gameObject);
     }
 
     public void AttemptFire()
@@ -51,7 +68,11 @@ public class PlayerWeaponController : MonoBehaviour
         if(Time.time - playerStats.attackTime >= lastFire)
         {
             bool hasBullet = PlayerInventory.Instance.ExpendAmmo();
-            if (!hasBullet) return;
+            if (!hasBullet)
+            {
+                FMODUnity.RuntimeManager.PlayOneShotAttached(NoAmmoEvent, gameObject);
+                return;
+            }
             FireAtMouse();
             lastFire = Time.time;
         }

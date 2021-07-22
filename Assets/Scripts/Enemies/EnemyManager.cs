@@ -17,7 +17,7 @@ public class EnemyManager : MonoBehaviour
     #endregion
 
 
-    public Transform levelCenter;
+    public Transform[] spawnDests;
     public Transform[] spawnPoints;
     public GameObject[] enemyPrefabs;
 
@@ -56,10 +56,14 @@ public class EnemyManager : MonoBehaviour
     GameObject newEnemy;
     public void SpawnEnemy()
     {
-        Transform sp = spawnPoints[Random.Range(0, spawnPoints.Length)];
+        int randIndex = Random.Range(0, spawnPoints.Length);
+        Debug.Log("SPAWN: " + randIndex);
+
+        Transform sp = spawnPoints[randIndex];
+        Transform dest = spawnDests[randIndex];
         GameObject randEnemy = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
         newEnemy = Instantiate(randEnemy, sp.position, Quaternion.identity, transform);
-        StartCoroutine(StartEnemyMove());
+        StartCoroutine(StartEnemyMove(dest));
         lastSpawnTime = Time.time;
     }
 
@@ -70,10 +74,10 @@ public class EnemyManager : MonoBehaviour
         GameStats.AddKill();
     }
 
-    IEnumerator StartEnemyMove()
+    IEnumerator StartEnemyMove(Transform dest)
     {
         yield return new WaitForSeconds(0.75f);
-        newEnemy.GetComponentInChildren<BasicEnemy>().SetMoveDest(levelCenter.position);
+        newEnemy.GetComponentInChildren<BasicEnemy>().SetMoveDest(dest.position);
     }
 
 }

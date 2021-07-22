@@ -25,7 +25,7 @@ public class PlayerInventory : MonoBehaviour
 
     void UpdateAmmoText()
     {
-        ammoText.text = "Ammo: " + ammoAmount + "/" + maxAmmo;
+        ammoText.text = ammoAmount + "/" + maxAmmo;
     }
 
     public void AddAmmo(int amount)
