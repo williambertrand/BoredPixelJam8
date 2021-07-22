@@ -9,6 +9,12 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu.unity
     guid: adbcd3b39a114884096faefc90b1e33a
   - enabled: 1
+    path: Assets/Scenes/EnemyTest.unity
+    guid: dc15f005ca9694b5d82f80df75ab5114
+  - enabled: 1
     path: Assets/Scenes/Gameplay.unity
     guid: 48610c55c9d558f44b2e6940764809d4
+  - enabled: 1
+    path: Assets/Scenes/GameOverScene.unity
+    guid: 335ae73a656f64aec83453f2dfe105c8
   m_configObjects: {}

@@ -17,6 +17,7 @@ public class EnemyManager : MonoBehaviour
     #endregion
 
 
+    public Transform levelCenter;
     public Transform[] spawnPoints;
     public GameObject[] enemyPrefabs;
 
@@ -47,22 +48,32 @@ public class EnemyManager : MonoBehaviour
         {
             currentSpwanTime *= spawnTimeFactor;
             if (currentSpwanTime < minSpawnTime) currentSpwanTime = minSpawnTime;
+            lastSpawnFactorUpdateTime = Time.time;
         }
         
     }
 
+    GameObject newEnemy;
     public void SpawnEnemy()
     {
         Transform sp = spawnPoints[Random.Range(0, spawnPoints.Length)];
         GameObject randEnemy = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
-        GameObject newEnemy = Instantiate(randEnemy, sp.position, Quaternion.identity, transform);
+        newEnemy = Instantiate(randEnemy, sp.position, Quaternion.identity, transform);
+        StartCoroutine(StartEnemyMove());
         lastSpawnTime = Time.time;
     }
-
 
     public void OnEnemyDeath(Enemy e)
     {
         PlayerBounty.Instance.AddBounty(e.bountyAmount);
+        GameStats.Addbounty(e.bountyAmount);
+        GameStats.AddKill();
+    }
+
+    IEnumerator StartEnemyMove()
+    {
+        yield return new WaitForSeconds(0.75f);
+        newEnemy.GetComponentInChildren<BasicEnemy>().SetMoveDest(levelCenter.position);
     }
 
 }

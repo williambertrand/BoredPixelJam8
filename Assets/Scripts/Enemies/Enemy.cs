@@ -12,6 +12,9 @@ public class Enemy : MonoBehaviour
     public int maxHealth;
     public int currentHealth;
 
+    [Tooltip("Ammo to drop on death")]
+    public int ammoAmount = 1;
+
 
     public void TakeDamage(int amount)
     {
@@ -24,8 +27,25 @@ public class Enemy : MonoBehaviour
 
     public void OnDeath()
     {
-        Debug.Log("Enemy ON DEATH!!!!!!");
+        DropAmmo();
         EnemyManager.Instance.OnEnemyDeath(this);
         Destroy(gameObject);
+    }
+
+    public void DropAmmo()
+    {
+        for (int i = 0; i < ammoAmount; i++)
+        {
+            GameObject ammo = Instantiate(LevelPrefabs.Instance.AmmoPickup);
+            ammo.transform.position = transform.position;
+
+            Rigidbody2D ammoRB = ammo.GetComponent<Rigidbody2D>();
+
+            Vector2 randPopVel = new Vector2(
+                Random.Range(-1.5f, 1.5f),
+                Random.Range(0, 1.5f)
+            );
+            ammoRB.velocity = randPopVel;
+        }
     }
 }

@@ -28,6 +28,7 @@ public class BasicEnemy : Enemy
 
     [Tooltip("How much damage this will do if it hits player")]
     public int attackDamage;
+    public float attackDistance;
 
     [Tooltip("Where attack/projectiles start")]
     public Transform attackPoint;
@@ -54,9 +55,11 @@ public class BasicEnemy : Enemy
     Vector3 startPos;
 
     // For determining which way the enemy is currently facing.
-    private bool m_FacingRight = true;
+    public bool m_FacingRight = true;
     private Rigidbody2D m_Rigidbody2D;
     private Vector3 velocity = Vector3.zero;
+
+    public LayerMask attackMask;
 
 
     public EnemyState currentState;
@@ -80,17 +83,20 @@ public class BasicEnemy : Enemy
     {
         if (Time.time > idleDone)
         {
-            //Transition back to patrolling
-            if (patrolSwitch)
+            if(patrolLoc != null)
             {
-                moveDest = patrolLoc.position;
+                //Transition back to patrolling
+                if (patrolSwitch)
+                {
+                    moveDest = patrolLoc.position;
+                }
+                else
+                {
+                    moveDest = startPos;
+                }
+                patrolSwitch = !patrolSwitch;
+                currentState = EnemyState.PATROLING;
             }
-            else
-            {
-                moveDest = startPos;
-            }
-            patrolSwitch = !patrolSwitch;
-            currentState = EnemyState.PATROLING;
         }
     }
 
@@ -105,7 +111,6 @@ public class BasicEnemy : Enemy
 
         if (target != null)
         {
-            Debug.Log("Started with target!!!");
             currentState = EnemyState.ATTACKING;
         }
         else if (patrolLoc != null)
@@ -130,6 +135,12 @@ public class BasicEnemy : Enemy
                 FireAtTarget();
             }
         }
+    }
+
+    public void SetMoveDest(Vector3 pos)
+    {
+        moveDest = pos;
+        currentState = EnemyState.MOVING;
     }
 
     // Update is called once per frame
@@ -159,7 +170,7 @@ public class BasicEnemy : Enemy
     void UpdateLookAt()
     {
         float dX = target.transform.position.x - transform.position.x;
-        if (dX < 0 && m_FacingRight)
+        if (dX > 0 && m_FacingRight)
         {
             // ... flip the enemy.
             Flip();
@@ -176,8 +187,17 @@ public class BasicEnemy : Enemy
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            currentState = EnemyState.ATTACKING;
             target = collision.gameObject;
+            // Check if enemy can see the player
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, target.transform.position - transform.position, attackDistance, attackMask);
+            if (hit.collider.CompareTag("Player"))
+            {
+                currentState = EnemyState.ATTACKING;
+            }
+            else
+            {
+                Debug.Log("hit tag: " + hit.collider.tag);
+            }
         }
     }
 
@@ -206,7 +226,6 @@ public class BasicEnemy : Enemy
         proj.GetComponent<Rigidbody2D>().velocity = dir * shootVel;
         proj.GetComponent<Projectile>().damage = attackDamage;
         lastAttack = Time.time;
-
     }
 
     void UpdateWeaponRot()
@@ -214,6 +233,10 @@ public class BasicEnemy : Enemy
         Vector3 diff = target.transform.position - weaponTransform.position;
         diff.Normalize();
         float rot_Z = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
+
+        if (m_FacingRight)
+            rot_Z -= 180;
+
         weaponTransform.rotation = Quaternion.Euler(0f, 0f, rot_Z + 180);
     }
 
@@ -254,6 +277,6 @@ public class BasicEnemy : Enemy
     {
         Gizmos.DrawSphere(moveDest, 0.2f);
         Handles.Label(transform.position + new Vector3(0, 1.0f, 0), currentState.ToString());
-        
+
     }
 }
