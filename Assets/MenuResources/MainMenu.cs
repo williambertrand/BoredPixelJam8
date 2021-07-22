@@ -28,7 +28,10 @@ public class MainMenu : MonoBehaviour
 
     public void PlayGame()
     {
+        FmodMusic music = FindObjectOfType<FmodMusic>();
+        music.Progress();
         SceneManager.LoadScene(GameScene);
+        
     }
 
     public void ReturnToMenu()

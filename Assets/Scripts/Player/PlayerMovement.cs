@@ -24,8 +24,11 @@ public class PlayerMovement : MonoBehaviour
 
 	[Header("Events")]
 	[Space]
-
 	public UnityEvent OnLandEvent;
+
+	[FMODUnity.EventRef]
+	public string JumpEvent;
+	FMOD.Studio.EventInstance PE;
 
 	[System.Serializable]
 	public class BoolEvent : UnityEvent<bool> { }
@@ -52,6 +55,14 @@ public class PlayerMovement : MonoBehaviour
 
 		isCrouched = false;
 	}
+
+	private void OnEnable()
+	{
+		PE = FMODUnity.RuntimeManager.CreateInstance(JumpEvent);
+		FMODUnity.RuntimeManager.AttachInstanceToGameObject(PE, transform, GetComponent<Rigidbody2D>());
+		PE.release();
+	}
+
 
 	private void FixedUpdate()
 	{
@@ -129,6 +140,7 @@ public class PlayerMovement : MonoBehaviour
 		// If the player should jump...
 		if (m_Grounded && jump)
 		{
+			FMODUnity.RuntimeManager.PlayOneShotAttached(JumpEvent, gameObject);
 			// Add a vertical force to the player.
 			m_Grounded = false;
 			m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));

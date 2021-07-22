@@ -15,13 +15,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public int GameOverScene = 3;
+    int GameOverScene = 2;
     // Start is called before the first frame update
     void Start()
     {
         GameObject obj = new GameObject("CameraEffects");
         obj.AddComponent<CameraEffects>();
         obj.transform.parent = transform;
+        OnGameStart();
     }
 
     // Update is called once per frame
@@ -36,8 +37,14 @@ public class GameManager : MonoBehaviour
 
     }
 
+    public void OnGameStart()
+    {
+        GameStats.Clear();
+    }
+
     public void OnGameOver()
     {
+        FindObjectOfType<FmodMusic>().Stop();
         SceneManager.LoadScene(GameOverScene);
     }
 }

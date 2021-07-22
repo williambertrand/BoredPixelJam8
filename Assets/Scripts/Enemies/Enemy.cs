@@ -15,6 +15,9 @@ public class Enemy : MonoBehaviour
     [Tooltip("Ammo to drop on death")]
     public int ammoAmount = 1;
 
+    protected Animator anim;
+    protected bool isDead = false;
+
 
     public void TakeDamage(int amount)
     {
@@ -28,7 +31,16 @@ public class Enemy : MonoBehaviour
     public void OnDeath()
     {
         DropAmmo();
+        isDead = true;
+        anim.SetFloat("move", 0.0f);
+        anim.SetTrigger("death");
         EnemyManager.Instance.OnEnemyDeath(this);
+        StartCoroutine(DestorySelf());
+    }
+
+    IEnumerator DestorySelf()
+    {
+        yield return new WaitForSeconds(0.4f);
         Destroy(gameObject);
     }
 

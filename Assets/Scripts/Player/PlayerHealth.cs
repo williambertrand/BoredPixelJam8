@@ -13,6 +13,17 @@ public class PlayerHealth : MonoBehaviour
     public List<Sprite> healthImages;
     public Image healthImage;
 
+    [FMODUnity.EventRef]
+    public string OnHitEvent;
+    FMOD.Studio.EventInstance PE;
+
+    private void OnEnable()
+    {
+        PE = FMODUnity.RuntimeManager.CreateInstance(OnHitEvent);
+        FMODUnity.RuntimeManager.AttachInstanceToGameObject(PE, transform, GetComponent<Rigidbody2D>());
+        PE.release();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -27,13 +38,15 @@ public class PlayerHealth : MonoBehaviour
         {
             healthImage.enabled = false;
             GameManager.Instance.OnGameOver();
+            //FMODUnity.RuntimeManager.PlayOneShotAttached(OnGameOverEvent, gameObject);
         }
         else
         {
+            FMODUnity.RuntimeManager.PlayOneShotAttached(OnHitEvent, gameObject);
             UpdateHealthImage();
         }
         if(isPlayer)
-            CameraEffects.Instance.CameraShake.Shake(0.425f, 0.2f);
+            CameraEffects.Instance.CameraShake.Shake(0.35f, 0.15f);
     }
 
     private void UpdateHealthImage()

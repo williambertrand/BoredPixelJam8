@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
 
 public enum EnemyState
@@ -21,6 +18,10 @@ public class BasicEnemy : Enemy
     public bool isRanged;
     public GameObject projectile;
     public float shootVel = 2.0f;
+
+    [FMODUnity.EventRef]
+    public string FireProjectileEvent;
+    FMOD.Studio.EventInstance PE;
 
     [Tooltip("How long between each attack")]
     public float attackTime;
@@ -108,6 +109,7 @@ public class BasicEnemy : Enemy
         currentState = EnemyState.IDLE;
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
         startPos = transform.position;
+        anim = GetComponent<Animator>();
 
         if (target != null)
         {
@@ -118,6 +120,13 @@ public class BasicEnemy : Enemy
             moveDest = patrolLoc.position;
             currentState = EnemyState.PATROLING;
         }
+    }
+
+    private void OnEnable()
+    {
+        PE = FMODUnity.RuntimeManager.CreateInstance(FireProjectileEvent);
+        FMODUnity.RuntimeManager.AttachInstanceToGameObject(PE, transform, GetComponent<Rigidbody2D>());
+        PE.release();
     }
 
     void _handleAttackState()
@@ -146,7 +155,7 @@ public class BasicEnemy : Enemy
     // Update is called once per frame
     void Update()
     {
-
+        if (isDead) return;
         switch (currentState)
         {
             case EnemyState.PATROLING:
@@ -226,6 +235,8 @@ public class BasicEnemy : Enemy
         proj.GetComponent<Rigidbody2D>().velocity = dir * shootVel;
         proj.GetComponent<Projectile>().damage = attackDamage;
         lastAttack = Time.time;
+
+        FMODUnity.RuntimeManager.PlayOneShotAttached(FireProjectileEvent, gameObject);
     }
 
     void UpdateWeaponRot()
@@ -271,12 +282,5 @@ public class BasicEnemy : Enemy
         Vector3 theScale = transform.localScale;
         theScale.x *= -1;
         transform.localScale = theScale;
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawSphere(moveDest, 0.2f);
-        Handles.Label(transform.position + new Vector3(0, 1.0f, 0), currentState.ToString());
-
     }
 }

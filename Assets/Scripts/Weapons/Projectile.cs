@@ -14,6 +14,12 @@ public class Projectile : MonoBehaviour
 
     Rigidbody2D rigidbody2D;
 
+    [FMODUnity.EventRef]
+    public string HitEvent;
+    [FMODUnity.EventRef]
+    public string HitEnemyEvent;
+    FMOD.Studio.EventInstance PE;
+
     [Tooltip("How long can this projectile last")]
     public float MaxLifeTime;
 
@@ -34,6 +40,16 @@ public class Projectile : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        if(HitEvent != null)
+        {
+            PE = FMODUnity.RuntimeManager.CreateInstance(HitEvent);
+            FMODUnity.RuntimeManager.AttachInstanceToGameObject(PE, transform, GetComponent<Rigidbody2D>());
+            PE.release();
+        }
+    }
+
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -49,10 +65,12 @@ public class Projectile : MonoBehaviour
         }
         else if (collision.gameObject.layer == 8) //TODO: Layer constants...
         {
+            //FMODUnity.RuntimeManager.PlayOneShotAttached(HitGroundEvent, gameObject);
             Destroy(gameObject);
         }
         else
         {
+            FMODUnity.RuntimeManager.PlayOneShotAttached(HitEnemyEvent, gameObject);
             Damageable d = collision.gameObject.GetComponent<Damageable>();
             if (d)
             {
